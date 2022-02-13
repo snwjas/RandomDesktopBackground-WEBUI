@@ -1,0 +1,48 @@
+{
+  "name": "random_desktop_background_gui",
+  "version": "2.2022.01.01",
+  "description": "Random Desktop Background WEBUI Version.",
+  "license": "MIT",
+  "keywords": [
+    "Background",
+    "Wallpaper"
+  ],
+  "author": {
+    "name": "Myles Yang",
+    "email": "myles.yang@foxmail.com",
+    "url": "https://refrain.xyz"
+  },
+  "scripts": {
+    "Init": "npm install && pip install virtualenv && virtualenv -p python3 venv && venv\\Scripts\\pip.exe install -r requirements.txt",
+    "StartDev": "concurrently -n py,vue \"venv\\Scripts\\python.exe src\\py\\application.py --env dev\" \"npm run WebDev\"",
+    "PyDev": "venv\\Scripts\\python.exe src\\py\\application.py --env dev",
+    "WebDev": "npm run CleanWebDist && parcel serve src/vue/public/index.html --open --cache-dir build/.dcache --dist-dir build/dist",
+    "TestProd": "npm run BuildWeb && venv\\Scripts\\python.exe src\\py\\application.py --env prod",
+    "StartTask": "venv\\Scripts\\python.exe src\\py\\application.py --run console --log both",
+    "CleanBuild": "if exist build rd /S /Q build",
+    "CleanWebDist": "if exist build\\dist rd /S /Q build\\dist && if exist build\\.dcache rd /S /Q build\\.dcache",
+    "CleanWebBuild": "if exist build\\webui rd /S /Q build\\webui && if exist build\\.bcache rd /S /Q build\\.bcache",
+    "CopyWebToPy": "if exist build\\webui ((if exist src\\py\\webui rd /S /Q src\\py\\webui) && xcopy /E/I/Y build\\webui src\\py\\webui)",
+    "BuildWeb": "npm run CleanWebBuild && parcel build src/vue/public/index.html --no-source-maps --public-url . --cache-dir build/.bcache --dist-dir build/webui",
+    "BuildExe": "npm run BuildWeb && npm run CopyWebToPy && cd bulid-win && build.bat"
+  },
+  "dependencies": {
+    "axios": "^0.21.4",
+    "element-ui": "^2.15.7",
+    "vue": "2.6.14",
+    "vue-router": "^3.5.2",
+    "vuex": "^3.5.2"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.0.1",
+    "parcel": "^2.0.1",
+    "parcel-config-vue2": "^0.1.3",
+    "parcel-transformer-vue2": "^0.1.7",
+    "vue-hot-reload-api": "^2.3.4",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^7.17.0",
+    "sass": "^1.44.0",
+    "concurrently": "^6.5.1"
+  }
+}

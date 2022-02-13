@@ -1,0 +1,8 @@
+setuptools == 60.8.2
+loguru == 0.5.3
+fastapi == 0.73.0
+uvicorn == 0.17.4
+pywin32 == 303
+system-hotkey == 1.0.3
+requests == 2.27.1
+pyinstaller == 4.8

@@ -1,0 +1,89 @@
+@mixin scrollBar {
+  &::-webkit-scrollbar {
+    width: 7px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #64a5ff;
+  }
+  &::-webkit-scrollbar-track {
+    background: #E8EAF0;
+  }
+  //&::-webkit-scrollbar-track-piece {
+  //  background: #d3dce6;
+  //}
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  height: 100%;
+  text-rendering: optimizeLegibility;
+  font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+}
+
+html {
+  height: 100%;
+  box-sizing: border-box;
+  @include scrollBar;
+}
+
+#app, .container {
+  width: 100%;
+  height: 100%;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+a {
+  text-decoration: none;
+  outline: none;
+  color: #409eff;
+  opacity: .7;
+
+  &:hover {
+    opacity: 1;
+    cursor: pointer;
+  }
+}
+
+div:focus {
+  outline: none;
+}
+
+.clearfix {
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+// element-u样式调整
+.el-dialog__header {
+  padding: 1.04vw 1.04vw 0.52vw 1.04vw;
+}
+
+.el-dialog__title {
+  font-size: 0.9375vw;
+}
+
+.el-dialog__body {
+  padding: 1.04vw;
+}
+
+.el-message {
+  min-width: 15.625vw;
+}
+
+.el-col-4-8 {
+  width: 20%;
+}
+
+.el-col-lg-4-8 {
+  width: 20%;
+}
