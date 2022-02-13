@@ -35,37 +35,38 @@ service.interceptors.response.use(
       return resp.data
     } else if (resp.status === 401) { // 非最近请求客户端
       const tips = Vue.prototype.$tipsInstance
+      console.log(tips)
       if (tips && tips.tipsName !== 'NOT_CURRENT_CLIENT') {
         tips.close()
-        GlobalTips({
-          tipsName: 'NOT_CURRENT_CLIENT',
-          spinner: '<i class="el-icon-connection" style="color: #de7d01"></i>',
-          text: '<span style="color: #de7d01">与WEBUI服务端失去连接...</span>',
-          buttons: [{
-            text: '重新连接',
-            click: async function() {
-              await store.dispatch('app/getToken').then(async() => {
-                const tips = Vue.prototype.$tipsInstance
-                if (tips && tips.tipsName === 'NOT_CURRENT_CLIENT') {
-                  tips.close()
-                }
-                Message({ message: '已重新连接上WEBUI服务端', type: 'success', duration: 3.6 * 1000 })
-                await store.dispatch('app/getStatus')
-                await store.dispatch('app/getConfig')
-                const loop = setInterval(() => {
-                  breathe().then(resp => {
-                    if (!(typeof resp === 'boolean' && resp)) {
-                      clearInterval(loop)
-                    }
-                  }).catch(() => {
-                    clearInterval(loop)
-                  })
-                }, 60000)
-              })
-            }
-          }]
-        })
       }
+      GlobalTips({
+        tipsName: 'NOT_CURRENT_CLIENT',
+        spinner: '<i class="el-icon-connection" style="color: #de7d01"></i>',
+        text: '<span style="color: #de7d01">与WEBUI服务端失去连接...</span>',
+        buttons: [{
+          text: '重新连接',
+          click: async function() {
+            await store.dispatch('app/getToken').then(async() => {
+              const tips = Vue.prototype.$tipsInstance
+              if (tips && tips.tipsName === 'NOT_CURRENT_CLIENT') {
+                tips.close()
+              }
+              Message({ message: '已重新连接上WEBUI服务端', type: 'success', duration: 3.6 * 1000 })
+              await store.dispatch('app/getStatus')
+              await store.dispatch('app/getConfig')
+              const loop = setInterval(() => {
+                breathe().then(resp => {
+                  if (!(typeof resp === 'boolean' && resp)) {
+                    clearInterval(loop)
+                  }
+                }).catch(() => {
+                  clearInterval(loop)
+                })
+              }, 60000)
+            })
+          }
+        }]
+      })
       return Promise.reject(new Error(resp.message || 'Error'))
     } else {
       const message = resp.message

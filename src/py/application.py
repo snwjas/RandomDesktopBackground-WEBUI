@@ -116,7 +116,8 @@ def check() -> bool:
         dao.init_db()
     # 检测程序是否在运行
     arg_dict = argsdef.arg_dict
-    if arg_dict.get(argsdef.ARG_KEY_RUN):
+    run_type = arg_dict.get(argsdef.ARG_KEY_RUN)
+    if run_type and run_type != argsdef.ARG_RUN_TYPE_WEBUI:
         try:
             if utils.is_process_running(configr.get_bpid()):
                 utils.create_dialog("检测到程序在运行中，请勿重复启动！", const.dialog_title,
