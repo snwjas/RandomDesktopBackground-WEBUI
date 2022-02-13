@@ -75,7 +75,7 @@ npm run BuildExe
 
 **[wallhaven](https://wallhaven.cc/)图源选择页面**
 
-![wallhaven](C:/Users/Administrator/Desktop/wallhaven.jpg)
+![wallhaven](md-assets/wallhaven.jpg)
 
 **部分程序设置页面**
 
