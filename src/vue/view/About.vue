@@ -11,14 +11,14 @@
         <a title="作者主页" target="_blank" href="http://refrain.xyz">Myles Yang</a>
       </div>
       <div>GitHub：
-        <a title="项目主页" target="_blank" href="https://github.com/snwjas/RandomDesktopBackground">
-          https://github.com/snwjas/RandomDesktopBackground
+        <a title="项目主页" target="_blank" href="https://github.com/snwjas/RandomDesktopBackground-WEBUI">
+          https://github.com/snwjas/RandomDesktopBackground-WEBUI
         </a>
       </div>
       <div>
         Gitee：
-        <a title="项目主页" target="_blank" href="https://github.com/snwjas/RandomDesktopBackground">
-          https://gitee.com/snwjas/random-desktop-background
+        <a title="项目主页" target="_blank" href="https://gitee.com/snwjas/random-desktop-background-webui">
+          https://gitee.com/snwjas/random-desktop-background-webui
         </a>
       </div>
     </div>
