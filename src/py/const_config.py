@@ -48,14 +48,22 @@ class Key:
         FPID = 'run.fpid'
         WORKDIR = 'run.workdir'
         STARTUP = 'run.startup'
+
         PROXY = 'run.proxy'
         _PROXY_NONE = 'none'
         _PROXY_SYSTEM = 'system'
 
+        ROTATION = 'run.rotation'
+        _ROTATION_LOCAL = 'local'
+        _ROTATION_NETWORK = 'network'
+        LOCAL__DISORDER = 'run.local.disorder'
+
     class Api(Enum):
         NAME = 'api.name'
+
         WALLHAVEN__URL = 'api.wallhaven.url'
         WALLHAVEN__APIKEY = 'api.wallhaven.apikey'
+
         CUSTOM = 'api.custom.url'
         _NAME_WALLHAVEN = 'wallhaven'
         _NAME_CUSTOM = 'custom'
@@ -68,6 +76,7 @@ class Key:
         RND_SLEEP_L = 'task.rnd_sleep_l'
         RND_SLEEP_R = 'task.rnd_sleep_r'
         RETAIN_BGS = 'task.retain_bgs'
+
         MAX_RETAIN_MB = 'task.max_retain_mb'
         _MODE_MULTIPLE = 'multiple'
         _MODE_SINGLE = 'single'
@@ -116,30 +125,32 @@ CREATE TABLE "config" (
 -- ----------------------------
 -- Records of config
 -- ----------------------------
-INSERT INTO "config" VALUES ('run.bpid', '-1', 'int', 'b''\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00J\xff\xff\xff\xff.''', '运行：后台运行程序的PID', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('run.fpid', '-1', 'int', 'b''\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00J\xff\xff\xff\xff.''', '运行：前台运行程序的PID', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('run.startup', 'False', 'bool', 'b''\x80\x04\x89.''', '运行：是否开机启动', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('run.workdir', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '运行：程序工作目录', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('run.proxy', 'system', 'str', 'b''\x80\x04\x95\n\x00\x00\x00\x00\x00\x00\x00\x8c\x06system\x94.''', '运行：用户代理[none|system]', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('api.name', 'wallhaven', 'str', 'b''\x80\x04\x95\r\x00\x00\x00\x00\x00\x00\x00\x8c\twallhaven\x94.''', 'API：图源名[wallhaven|custom]', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('api.wallhaven.url', 'https://wallhaven.cc/search?categories=110&purity=100&sorting=random&order=des', 'str', 'b''\x80\x04\x95R\x00\x00\x00\x00\x00\x00\x00\x8cNhttps://wallhaven.cc/search?categories=110&purity=100&sorting=random&order=des\x94.''', 'API：wallhaven图源地址', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('api.wallhaven.apikey', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', 'API：wallhaven API Key', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('api.custom.url--536007639', 'https://api.btstu.cn/sjbz/?lx=suiji', 'str', NULL, '', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('api.custom.url--542024925', 'https://api.btstu.cn/sjbz/?lx=meizi', 'str', NULL, '', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('api.custom.url--302158599', 'https://api.btstu.cn/sjbz/?lx=dongman', 'str', NULL, '', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('task.seconds', '600', 'int', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00MX\x02.''', '任务：切换频率', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('task.current', '0', 'int', 'b''\x80\x04K\x00.''', '任务：当前壁纸下标', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('task.mode', 'multiple', 'str', 'b''\x80\x04\x95\x0c\x00\x00\x00\x00\x00\x00\x00\x8c\x08multiple\x94.''', '任务：壁纸拉取模式[multiple|single]', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('task.threads', '2', 'int', 'b''\x80\x04K\x02.''', '任务：壁纸拉取时使用线程数量', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('task.rnd_sleep_l', '0.5', 'float', 'b''\x80\x04\x95\n\x00\x00\x00\x00\x00\x00\x00G?\xe0\x00\x00\x00\x00\x00\x00.''', '任务：壁纸拉取时随机停顿间隔时间左', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('task.rnd_sleep_r', '5', 'float', 'b''\x80\x04K\x05.''', '任务：壁纸拉取时随机停顿间隔时间右', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('task.retain_bgs', 'False', 'bool', 'b''\x80\x04\x89.''', '任务：是否保留已经拉取下来的壁纸', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('task.max_retain_mb', '-1', 'int', 'b''\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00J\xff\xff\xff\xff.''', '任务：壁纸保留最大占用内存', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('hotkey.enable', 'False', 'bool', 'b''\x80\x04\x89.''', '热键：是否启用全局热键', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('hotkey.prev_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：切换到上一张壁纸', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('hotkey.next_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：切换到下一张壁纸', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('hotkey.fav_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：收藏当前壁纸', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
-INSERT INTO "config" VALUES ('hotkey.loc_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：定位到当前壁纸文件', 1, '2022-01-01 00:00:00', '2022-01-01 00:00:00');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('run.bpid', '-1', 'int', 'b''\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00J\xff\xff\xff\xff.''', '运行：后台运行程序的PID');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('run.fpid', '-1', 'int', 'b''\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00J\xff\xff\xff\xff.''', '运行：前台运行程序的PID');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('run.startup', 'False', 'bool', 'b''\x80\x04\x89.''', '运行：是否开机启动');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('run.workdir', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '运行：程序工作目录');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('run.proxy', 'none', 'str', 'b''\x80\x04\x95\n\x00\x00\x00\x00\x00\x00\x00\x8c\x06system\x94.''', '运行：用户代理[none|system]');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('run.rotation', 'network', 'str', 'b''\x80\x04\x95\x0b\x00\x00\x00\x00\x00\x00\x00\x8c\x07network\x94.''', '运行：轮播方式[network|local]');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('run.local.disorder', 'True', 'bool', 'b''\x80\x04\x88.''', '运行：本地轮播是否为无序');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.name', 'wallhaven', 'str', 'b''\x80\x04\x95\r\x00\x00\x00\x00\x00\x00\x00\x8c\twallhaven\x94.''', 'API：图源名[wallhaven|custom]');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.wallhaven.url', 'https://wallhaven.cc/search?categories=111&purity=110&sorting=random&order=desc', 'str', 'b''\x80\x04\x95S\x00\x00\x00\x00\x00\x00\x00\x8cOhttps://wallhaven.cc/search?categories=111&purity=110&sorting=random&order=desc\x94.''', 'API：wallhaven图源地址');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.wallhaven.apikey', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', 'API：wallhaven API Key');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.custom.url--536007639', 'https://api.btstu.cn/sjbz/?lx=suiji', 'str', NULL, '');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.custom.url--542024925', 'https://api.btstu.cn/sjbz/?lx=meizi', 'str', NULL, '');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.custom.url--302158599', 'https://api.btstu.cn/sjbz/?lx=dongman', 'str', NULL, '');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('task.seconds', '1440', 'int', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00M\xa0\x05.''', '任务：切换频率');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('task.current', '0', 'int', 'b''\x80\x04K\x00.''', '任务：当前壁纸下标');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('task.mode', 'multiple', 'str', 'b''\x80\x04\x95\x0c\x00\x00\x00\x00\x00\x00\x00\x8c\x08multiple\x94.''', '任务：壁纸拉取模式[multiple|single]');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('task.threads', '2', 'int', 'b''\x80\x04K\x02.''', '任务：壁纸拉取时使用线程数量');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('task.rnd_sleep_l', '0.5', 'float', 'b''\x80\x04\x95\n\x00\x00\x00\x00\x00\x00\x00G?\xe0\x00\x00\x00\x00\x00\x00.''', '任务：壁纸拉取时随机停顿间隔时间左');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('task.rnd_sleep_r', '5', 'int', 'b''\x80\x04K\x05.''', '任务：壁纸拉取时随机停顿间隔时间右');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('task.retain_bgs', 'False', 'bool', 'b''\x80\x04\x89.''', '任务：是否保留已经拉取下来的壁纸');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('task.max_retain_mb', '-1', 'int', 'b''\x80\x04\x95\x06\x00\x00\x00\x00\x00\x00\x00J\xff\xff\xff\xff.''', '任务：壁纸保留最大占用内存');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('hotkey.enable', 'False', 'bool', 'b''\x80\x04\x89.''', '热键：是否启用全局热键');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('hotkey.prev_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：切换到上一张壁纸');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('hotkey.next_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：切换到下一张壁纸');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('hotkey.fav_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：收藏当前壁纸');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('hotkey.loc_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：定位到当前壁纸文件');
 
 -- ----------------------------
 -- Indexes structure for table config
@@ -152,7 +163,7 @@ ON "config" (
 -- ----------------------------
 -- Triggers structure for table config
 -- ----------------------------
-CREATE TRIGGER "onUpdate"
+CREATE TRIGGER "config.onupdate"
 AFTER UPDATE
 ON "config"
 BEGIN

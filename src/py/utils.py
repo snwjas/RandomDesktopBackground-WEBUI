@@ -17,7 +17,7 @@ import time
 import typing
 import urllib.request
 import webbrowser
-from typing import List
+from typing import List, Union
 
 import pythoncom
 import requests
@@ -82,6 +82,17 @@ def set_background_fit(wallpaper_style=0, tile_wallpaper=0):
     # TileWallpaper：1平铺，居中0，其他0
     win32api.RegSetValueEx(reg_key, "TileWallpaper", 0, win32con.REG_SZ, str(tile_wallpaper))
     win32api.RegCloseKey(reg_key)
+
+
+def get_run_args(args: Union[dict, str]):
+    """ 获取参数运行 """
+    if isinstance(args, str):
+        return args
+    str_args = ''
+    for key in args:
+        value = args.get(key)
+        str_args += ' {} {}'.format(key, value if value else '')
+    return str_args
 
 
 def get_shortcut(shortcut) -> str:
@@ -299,12 +310,36 @@ def is_lock_workstation() -> bool:
     return hwnd <= 0
 
 
-def is_process_running(pid: int):
+def get_process_path(pid: int) -> str:
+    """
+    获取进程路径（可能会因权限不足而获取失败）
+    :param pid: 进程ID
+    :return: 运行文件的绝对路径
+    """
+    hwnd = None
+    try:
+        hwnd = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION | win32con.PROCESS_VM_READ, win32con.FALSE, pid)
+        return win32process.GetModuleFileNameEx(hwnd, 0)
+    except:
+        return None
+    finally:
+        if hwnd: win32api.CloseHandle(hwnd)
+
+
+def is_process_running(pid: int, ppath: str = None):
     """ 判断进程是否在运行
     :param pid: 进程ID
+    :param ppath: 程序绝对路径，根据pid获取程序路径，在对比
     """
     try:
-        return win32process.GetProcessVersion(pid) > 0
+        is_running = win32process.GetProcessVersion(pid) > 0
+        if is_running and ppath:
+            path = get_process_path(pid)
+            if not path:
+                return False
+            return os.path.normcase(path) == os.path.normcase(ppath)
+        else:
+            return is_running
     except:
         return False
 
@@ -489,13 +524,14 @@ def is_network_available() -> bool:
     """ 判断网络是否连通 """
     url = 'baidu.com'
     try:
-        popen = os.popen('nslookup {} && exit'.format(url))
-        result = popen.read()
-        if re.match(r'.*(No response|fec0:0:0:ffff::1|127.0.0.1).*', result, flags=re.I | re.S):
-            return False
+        # popen = os.popen('nslookup {}'.format(url))
+        # result = popen.read()
+        # if re.match(r'.*(No response|fec0:0:0:ffff::1|127.0.0.1).*', result, flags=re.I | re.S):
+        #     return False
+        exit_code = os.system('ping {}'.format(url))
+        return exit_code == 0
     except:
         return False
-    return True
 
 
 def set_win_title(title: str, pid: int = None):
@@ -511,7 +547,7 @@ def set_win_title(title: str, pid: int = None):
         hwnd = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION, False, pid)
         win32gui.SetWindowText(hwnd, title)
         return True
-    except Exception as e:
+    except:
         return False
     finally:
         if hwnd: win32api.CloseHandle(hwnd)

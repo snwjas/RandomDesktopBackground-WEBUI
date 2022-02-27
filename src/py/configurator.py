@@ -26,15 +26,18 @@ def get_bg_abspaths():
     """
     bg_srcpath = get_wallpaper_abspath()
     bg_paths = []
-    if os.path.exists(bg_srcpath) and os.path.isfile(bg_srcpath):
-        os.remove(bg_srcpath)
-        return bg_paths
-    os.makedirs(bg_srcpath, exist_ok=True)
+    try:
+        if os.path.exists(bg_srcpath) and os.path.isfile(bg_srcpath):
+            os.remove(bg_srcpath)
+            return bg_paths
+        os.makedirs(bg_srcpath, exist_ok=True)
 
-    for df in os.listdir(bg_srcpath):
-        df_abspath = os.path.join(bg_srcpath, df)
-        if os.path.isfile(df_abspath):
-            bg_paths.append(df_abspath)
+        for df in os.listdir(bg_srcpath):
+            df_abspath = os.path.join(bg_srcpath, df)
+            if os.path.isfile(df_abspath):
+                bg_paths.append(df_abspath)
+    except:
+        pass
 
     return bg_paths
 
@@ -88,6 +91,21 @@ def get_proxies(config: Dict[str, ConfigVO] = None) -> Dict[str, str]:
     if proxy_name == const.Key.Run._PROXY_SYSTEM.value:
         return urllib.request.getproxies()
     return {}
+
+
+def get_rotation(config: Dict[str, ConfigVO] = None) -> str:
+    """ 获取轮播方式 """
+    key = const.Key.Run.ROTATION.value
+    vo = config.get(key) if config else dao.get_config(key)
+    return vo.value if vo and vo.value else const.Key.Run._ROTATION_NETWORK.value
+
+
+def is_local_disorder(config: Dict[str, ConfigVO] = None) -> bool:
+    """ 是否为本地轮播且为无序 """
+    key = const.Key.Run.LOCAL__DISORDER.value
+    vo = config.get(key) if config else dao.get_config(key)
+    rotation = get_rotation(config)
+    return rotation == const.Key.Run._ROTATION_LOCAL.value and vo and vo.value
 
 
 """============================ [Api] ============================"""

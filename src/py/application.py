@@ -36,10 +36,9 @@ def run_in_the_console():
     try:
 
         config = configr.parse_config()
-        bg_abspath_list = configr.get_bg_abspaths()
 
         gtask = GetBackgroundTask(config)
-        stask = SetBackgroundTask(config, bg_abspath_list, gtask.run)
+        stask = SetBackgroundTask(config, gtask.run)
 
         gtask.init_task(stask)
 
@@ -92,6 +91,9 @@ def run_on_startup(log_type: str = None):
 
 def run_webui():
     """ 启动webui """
+    if utils.is_process_running(configr.get_fpid(), app_fullpath):
+        utils.open_url(const.server)
+        return
     args = ' {} {} {} {}'.format(argsdef.ARG_RUN, argsdef.ARG_RUN_TYPE_WEBUI,
                                  argsdef.ARG_LOG, argsdef.ARG_LOG_TYPE_NONE
                                  )
@@ -118,14 +120,11 @@ def check() -> bool:
     arg_dict = argsdef.arg_dict
     run_type = arg_dict.get(argsdef.ARG_KEY_RUN)
     if run_type and run_type != argsdef.ARG_RUN_TYPE_WEBUI:
-        try:
-            if utils.is_process_running(configr.get_bpid()):
-                utils.create_dialog("检测到程序在运行中，请勿重复启动！", const.dialog_title,
-                                    style=win32con.MB_ICONERROR, interval=7,
-                                    callback=lambda x: utils.kill_process([os.getpid(), utils.getpid()]))
-                return False
-        except:
-            pass
+        if utils.is_process_running(configr.get_bpid(), app_fullpath):
+            utils.create_dialog("检测到程序在运行中，请勿重复启动！", const.dialog_title,
+                                style=win32con.MB_ICONERROR, interval=7,
+                                callback=lambda x: utils.kill_process([os.getpid(), utils.getpid()]))
+            return False
 
     return True
 

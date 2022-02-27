@@ -4,5 +4,5 @@ fastapi == 0.73.0
 uvicorn == 0.17.4
 pywin32 == 303
 system-hotkey == 1.0.3
-requests == 2.27.1
+requests == 2.24.0
 pyinstaller == 4.8

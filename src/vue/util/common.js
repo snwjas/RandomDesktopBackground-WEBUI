@@ -1,8 +1,8 @@
-// 睡眠函数，在调用的函数上需加上 async，调用它需要加 await
-// e.g. async function exec() { ... await sleep(1000) ... }
 import { Message } from 'element-ui'
 import axios from 'axios'
 
+// 睡眠函数，在调用的函数上需加上 async，调用它需要加 await
+// e.g. async function exec() { ... await sleep(1000) ... }
 export function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
@@ -19,7 +19,7 @@ export function colorHexToRGB(color, isArr) {
   if (/^#[0-9a-fA-F]{3,6}/.test(color)) {
     const hexArray = []
     let count = 1
-    for (var i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 3; i++) {
       if (color.length - 2 * i > 3 - i) {
         hexArray.push(Number('0x' + color.substring(count, count + 2)))
         count += 2
@@ -42,32 +42,33 @@ export function uuid() {
   const url = URL.createObjectURL(new Blob())
   const uuid = url.toString()
   URL.revokeObjectURL(url)
-  return uuid.substr(uuid.lastIndexOf('/') + 1)
+  return uuid.substring(uuid.lastIndexOf('/') + 1)
 }
 
 /**
- * 字节单位转换 -> B|KB|MB|GM
- * @param byte 字节数
+ * 字节单位转换 -> B|KB|MB|GB
+ * @param {number} byte 字节数
+ * @param {number} fixed 保留小数位数
  * @returns {string}
  */
-export function convertBit(byte) {
+export function convertBit(byte, fixed = 2) {
   byte = parseInt(byte)
   let size
   if (byte < 0.1 * 1024) { // 如果小于0.1KB转化成B
-    size = byte.toFixed(2) + 'B'
+    size = byte.toFixed(fixed) + 'B'
   } else if (byte < 0.1 * 1024 * 1024) { // 如果小于0.1MB转化成KB
-    size = (byte / 1024).toFixed(2) + 'KB'
+    size = (byte / 1024).toFixed(fixed) + 'KB'
   } else if (byte < 0.1 * 1024 * 1024 * 1024) { // 如果小于0.1GB转化成MB
-    size = (byte / (1024 * 1024)).toFixed(2) + 'MB'
+    size = (byte / (1024 * 1024)).toFixed(fixed) + 'MB'
   } else { // 其他转化成GB
-    size = (byte / (1024 * 1024 * 1024)).toFixed(2) + 'GB'
+    size = (byte / (1024 * 1024 * 1024)).toFixed(fixed) + 'GB'
   }
 
   const sizeStr = size + ''
   const len = sizeStr.indexOf('\.')
-  const dec = sizeStr.substr(len + 1, 2)
+  const dec = sizeStr.substring(len + 1, len + 3)
   if (dec === '00') { // 当小数点后为00时 去掉小数部分
-    return sizeStr.substring(0, len) + sizeStr.substr(len + 3, 2)
+    return sizeStr.substring(0, len) + sizeStr.substring(len + 3, 5)
   }
   return sizeStr
 }
@@ -201,12 +202,25 @@ export function getURLParams(url) {
   const params = {}
   const idx = url.indexOf('?')
   if (idx !== -1) {
-    const str = url.substr(idx + 1)
+    const str = url.substring(idx + 1, url.length)
     const strArr = str.split('&')
     for (let i = 0; i < strArr.length; i++) {
-      params[strArr[i].split('=')[0]] = unescape(strArr[i].split('=')[1])
+      params[strArr[i].split('=')[0]] = decodeURIComponent(strArr[i].split('=')[1])
     }
   }
   return params
 }
 
+/**
+ * 关闭当前标签页
+ */
+export function closeWebPage() {
+  if (navigator.userAgent.indexOf('MSIE') > 0 &&
+    !navigator.userAgent.indexOf('MSIE 6.0') > 0) { // IE 6 +
+    window.open('', '_top')
+    window.top.close()
+    return
+  }
+  window.location.href = 'about:blank'
+  window.close()
+}

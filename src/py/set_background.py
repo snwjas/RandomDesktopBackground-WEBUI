@@ -1,8 +1,10 @@
 # -*-coding:utf-8-*-
 import ctypes
 import os
+import random
 import shutil
 import time
+from threading import Thread
 from typing import Dict, Callable, List
 
 import win32con
@@ -32,14 +34,13 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
     @author Myles Yang
     """
 
-    def __init__(self, config: Dict[str, ConfigVO], bg_paths: list, get_bg_func: Callable):
+    def __init__(self, config: Dict[str, ConfigVO], get_bg_func: Callable):
         """
-        :param bg_paths: 文件夹 wallpapers 中壁纸文件的路径
         :param config: 配置
         :param get_bg_func: 拉取壁纸的函数
         """
         self.__config = config
-        self.__bg_paths = bg_paths
+        self.__bg_paths = configr.get_bg_abspaths()
         self.__current = self.set_current(configr.get_current(config))
         self.__seconds = configr.get_seconds(config)
 
@@ -98,18 +99,21 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
         log.info('自动切换随机桌面背景任务已启动')
         log.info('桌面背景切换间隔：{}秒'.format(self.__seconds))
 
+        # 绑定全局热键
+        self.bind_hotkey()
+        # 开启后台定时切换任务
+        self.__timer = SimpleTaskTimer()
+        self.__timer.run(self.__seconds, self.next_bg)
+
         # 切换当前壁纸
         if self.__bg_paths:
             if 0 <= self.__current < len(self.__bg_paths):
                 self.set_background(self.__bg_paths[self.__current])
             else:
                 self.set_background_idx(0)
-
-        # 绑定全局热键
-        self.bind_hotkey()
-        # 开启后台定时切换任务
-        self.__timer = SimpleTaskTimer()
-        self.__timer.run(self.__seconds, self.next_bg)
+        else:
+            self.set_current(0)
+            self.next_bg()
 
     def next_bg(self):
         """
@@ -118,6 +122,10 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
 
         # 锁屏状态下不切换
         if utils.is_lock_workstation():
+            return
+
+        if configr.is_local_disorder(self.__config):
+            self.random_bg()
             return
 
         # 限制热键切换频率
@@ -142,6 +150,10 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
         """
         切换上一个壁纸
         """
+        if configr.is_local_disorder(self.__config):
+            self.random_bg()
+            return
+
         if time.time() - self.__last_change_time < _allowed_manual_switching_interval_time:
             return
 
@@ -156,6 +168,13 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
                 self.set_current(pre)
                 return
             pre -= 1
+
+    def random_bg(self):
+        """ 随机切换壁纸 """
+        if not self.__bg_paths:
+            return
+        idx = random.randint(0, len(self.__bg_paths) - 1)
+        self.set_background_idx(idx)
 
     def locate_bg(self):
         """
@@ -182,11 +201,16 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
         """
         重新拉取壁纸
         """
+        if configr.get_rotation(self.__config) == const.Key.Run._ROTATION_LOCAL.value:
+            """ 本地顺序轮询 """
+            self.set_background_idx(0)
+            return
         if not utils.is_network_available():
             log.info('网络不连通，取消拉取壁纸，重新轮换已下载的壁纸')
             self.set_background_idx(0)
             return
-        self.__func_get_bg()
+        # self.__func_get_bg()
+        Thread(target=self.__func_get_bg).start()
 
     def set_background(self, abs_path: str, index: int = None):
         """

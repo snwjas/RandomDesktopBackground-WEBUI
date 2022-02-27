@@ -24,26 +24,36 @@ def get_status():
 
     # 运行状态
     bpid = configr.get_bpid()
-    status.running = bpid and utils.is_process_running(bpid)
+    status.running = bpid and utils.is_process_running(bpid, app.app_fullpath)
 
     return status
 
 
 def toggle_startup_shutdown():
     """ 切换程序开关 """
-    bpid = configr.get_bpid()
-    if bpid and utils.is_process_running(bpid):
-        configr.record_bpid(False)
-        utils.kill_process([bpid])
-    else:
-        succeed = app.run_in_the_background(argsdef.ARG_LOG_TYPE_FILE)
-        loop = 10
-        while succeed and loop > 0:
+
+    def check_running_status(running: bool):
+        loop = 60  # 30 seconds allowable check time
+        while loop > 0:
             bpid = configr.get_bpid()
-            if bpid and utils.is_process_running(bpid):
-                break
+            if running:
+                if bpid and utils.is_process_running(bpid, app.app_fullpath):
+                    break
+            else:
+                if bpid and not utils.is_process_running(bpid, app.app_fullpath):
+                    break
             time.sleep(0.5)
             loop -= 1
+
+    bpid = configr.get_bpid()
+    if bpid and utils.is_process_running(bpid, app.app_fullpath):
+        configr.record_bpid(False)
+        utils.kill_process([bpid])
+        check_running_status(False)
+    else:
+        succeed = app.run_in_the_background(argsdef.ARG_LOG_TYPE_FILE)
+        if succeed:
+            check_running_status(True)
     return get_status()
 
 
@@ -98,10 +108,20 @@ def delete_startup_lnk():
 
 def locate_favorite_path():
     """ 打开收藏文件夹 """
-    workdir = configr.get_workdir()
-    favorite_path = os.path.join(workdir, const.favorite_srcpath)
+    favorite_path = configr.get_favorite_abspath()
 
     if os.path.isdir(favorite_path):
         utils.locate_path(favorite_path, False)
     else:
         raise E().ret(message="收藏目录不存在：{}".format(favorite_path))
+
+
+def locate_workdir():
+    """ 打开工作目录 """
+    workdir = configr.get_workdir()
+    workdir = workdir if workdir else 'run'
+
+    if os.path.isdir(workdir):
+        utils.locate_path(workdir, False)
+    else:
+        raise E().ret(message="工作目录不存在：{}".format(workdir))

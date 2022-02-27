@@ -144,6 +144,13 @@ async def locate_favorite_path():
     return R().ok(message='打开收藏文件夹')
 
 
+@api.get("/locate-workdir")
+async def locate_workdir():
+    """ 打开工作目录 """
+    service.locate_workdir()
+    return R().ok(message='打开工作目录')
+
+
 @api.post("/wallhaven")
 async def get_wallhaven(request: Request):
     """ wallhaven接口数据，因为前端直接请求会产生跨域，直接后端请求返回 """

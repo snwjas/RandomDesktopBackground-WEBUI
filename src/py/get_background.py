@@ -79,7 +79,6 @@ class GetBackgroundTask(object, metaclass=SingletonMetaclass):
             # utils.create_dialog('后台正在拉取壁纸...\n\n请等待任务完成在执行此操作!', const.dialog_title,
             #                     interval=2, style=win32con.MB_ICONWARNING)
             return
-
         # 保存原来的壁纸的路径
         self.old_bg_abspaths = configr.get_bg_abspaths()
         # 拉取壁纸
@@ -315,15 +314,15 @@ class GetBackgroundTask(object, metaclass=SingletonMetaclass):
             task_mode = configr.get_task_mode(self.config)
             if task_mode == const.Key.Task._MODE_SINGLE.value:  # 每次下载一张
                 if self.single_curidx >= len(self.await_dwn_bg_urls) - 1:
-                    bg_urls = self.await_dwn_bg_urls = self.get_random_bg_urls()
+                    self.await_dwn_bg_urls = self.get_random_bg_urls()
                     self.single_curidx = 0
-                    if bg_urls:
-                        threading.Thread(
-                            target=lambda: self.__single_dwn_bg(self.await_dwn_bg_urls[self.single_curidx])).start()
+                if self.await_dwn_bg_urls:
+                    threading.Thread(
+                        target=lambda: self.__single_dwn_bg(self.await_dwn_bg_urls[self.single_curidx])).start()
             else:  # 每次下载多张
-                bg_urls = self.await_dwn_bg_urls = self.get_random_bg_urls()
-                if bg_urls:
-                    threading.Thread(target=lambda: self.__parallel_dwn_bg(bg_urls)).start()
+                self.await_dwn_bg_urls = self.get_random_bg_urls()
+                if self.await_dwn_bg_urls:
+                    threading.Thread(target=lambda: self.__parallel_dwn_bg(self.await_dwn_bg_urls)).start()
                 else:
                     self.taskCount = 0
         finally:

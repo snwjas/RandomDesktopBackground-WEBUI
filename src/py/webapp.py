@@ -113,13 +113,17 @@ app.include_router(api_router)
 
 def run_app():
     # 检测服务是否可用
-    try:
-        resp = utils.simple_request_get(const.server)
-        if resp and resp.status_code == 200:
-            __open_webui()
-            return
-    except:
-        pass
+    # try:
+    #     resp = utils.simple_request_get(const.server)
+    #     if resp and resp.status_code == 200:
+    #         __open_webui()
+    #         return
+    # except:
+    #     pass
+    import application as app
+    if utils.is_process_running(configr.get_fpid(), app.app_fullpath):
+        __open_webui()
+        return
     try:
         # 进程启动
         if run_args.get(argsdef.ARG_KEY_ENV) == argsdef.ARG_ENV_TYPE_PROD:
