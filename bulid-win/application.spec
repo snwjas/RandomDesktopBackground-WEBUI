@@ -29,6 +29,7 @@ a = Analysis([get_module_path('application.py'),
              pathex=[],
              binaries=[],
              datas=[
+                 ('cmdtransmitter.exe', '.'),
                  (os.path.join(root_path, 'rdbdb.db'), '.'),
                  (os.path.join(src_path, 'webui'), 'webui'),
              ],
@@ -52,9 +53,10 @@ exe = EXE(pyz,
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
+          resources=[],
           upx=True,
-          console=True,
-          icon='favicon.ico')
+          console=False,
+          icon=['favicon.ico','pre.ico','nxt.ico','fav.ico','loc.ico'])
 
 coll = COLLECT(exe,
                a.binaries,

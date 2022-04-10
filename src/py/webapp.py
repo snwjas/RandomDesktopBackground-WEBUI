@@ -134,4 +134,4 @@ def run_app():
         log.error('WEBUI服务启动失败，{}'.format(e))
         utils.create_dialog("WEBUI服务启动失败！", const.dialog_title,
                             style=win32con.MB_ICONERROR, interval=7,
-                            callback=lambda x: utils.kill_process([utils.getpid()]))
+                            callback=lambda x: utils.kill_process([os.getpid()]))

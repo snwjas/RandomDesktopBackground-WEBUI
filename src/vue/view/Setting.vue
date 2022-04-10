@@ -7,18 +7,30 @@
           <el-checkbox v-model="form.run.startup">开机启动程序</el-checkbox>
           <el-button type="text" style="margin-left: 30px;" @click="createDesktopLnk">创建桌面快捷方式</el-button>
         </el-form-item>
+        <el-form-item label="轮播">
+          <el-radio-group v-model="form.run.rotation">
+            <el-radio label="network">在线壁纸</el-radio>
+            <el-radio label="local">本地壁纸</el-radio>
+          </el-radio-group>
+          <el-checkbox
+            v-if="form.run.rotation==='local'"
+            v-model="form.run.local.disorder"
+            style="margin-left: 30px;"
+          >无序
+          </el-checkbox>
+        </el-form-item>
         <el-form-item label="工作目录">
-          <el-input v-model="form.run.workdir" readonly clearable placeholder="存放壁纸、日志...的目录，默认为程序所在路径">
+          <el-input v-model="form.run.workdir" readonly clearable placeholder="存放壁纸、日志等的目录，默认为程序所在路径run目录" @click.native="selectWorkdir">
             <i
               v-if="form.run.workdir"
               slot="suffix"
               class="clearbtn el-input__icon el-icon-circle-close"
-              @click="form.run.workdir=''"
+              @click="clearWorkdir"
             ></i>
-            <el-button slot="append" icon="el-icon-folder" title="点击选择工作目录" @click="selectDir"></el-button>
+            <el-button slot="append" icon="el-icon-folder-opened" title="打开工作目录" @click="locateWorkdir"></el-button>
           </el-input>
         </el-form-item>
-        <el-form-item label="用户代理">
+        <el-form-item label="用户代理" :class="[form.run.rotation==='local'?'disabled':'']">
           <el-radio-group v-model="form.run.proxy">
             <el-radio label="none">不使用代理</el-radio>
             <el-radio label="system">使用系统代理</el-radio>
@@ -26,11 +38,11 @@
         </el-form-item>
         <!--///////////////////////////////////////////////////////-->
         <el-divider content-position="left">图源设置</el-divider>
-        <el-form-item label="选择图源">
+        <el-form-item label="在线图源" :class="[form.run.rotation==='local'?'disabled':'']">
           <el-popover trigger="hover" placement="top">
             <div>{{
               form.api.name === 'wallhaven'
-                ? '点击下方API输入框右侧按钮跳转跳转至wallhaven图源类型设置页面'
+                ? '点击下方API输入框右侧按钮跳转跳转至wallhaven图源设置页面'
                 : '可输入多个自定义图源API，但API须指向一张图片'
             }}
             </div>
@@ -43,7 +55,7 @@
             <el-radio label="custom">自定义</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="API" class="api-form-item">
+        <el-form-item label="API地址" class="api-form-item" :class="[form.run.rotation==='local'?'disabled':'']">
           <el-input
             v-if="form.api.name==='wallhaven'"
             v-model="form.api.wallhaven.url"
@@ -56,7 +68,7 @@
               placement="top-end"
               hide-icon
               width="290"
-              title="即将跳转至wallhaven图源类型设置页面，是否需要保存当前设置？"
+              title="即将跳转至wallhaven图源设置页面，是否需要保存当前设置？"
               @cancel="toWallhavenSetting"
               @confirm="updateConfigAndToWallhavenSetting"
             >
@@ -96,7 +108,7 @@
             controls-position="right"
           ></el-input-number>
         </el-form-item>
-        <el-form-item label="任务模式">
+        <el-form-item label="任务模式" :class="[form.run.rotation==='local'?'disabled':'']">
           <el-radio-group v-model="form.task.mode">
             <el-radio label="multiple">多张</el-radio>
             <el-radio label="single">一张</el-radio>
@@ -170,7 +182,16 @@
         </el-form-item>
         <!--///////////////////////////////////////////////////////-->
         <el-divider content-position="left">快捷键设置</el-divider>
-        <el-form-item label="全局设置">
+        <el-form-item label="右键菜单">
+          <el-checkbox v-model="form.ctxmenu.enable">启用桌面右键菜单</el-checkbox>
+          <div style="margin-top: 5px;" :class="[form.ctxmenu.enable?'':'disabled']">
+            <el-checkbox v-model="form.ctxmenu.prev_bg" label="上一张壁纸" :disabled="!form.ctxmenu.enable"></el-checkbox>
+            <el-checkbox v-model="form.ctxmenu.next_bg" label="下一张壁纸" :disabled="!form.ctxmenu.enable"></el-checkbox>
+            <el-checkbox v-model="form.ctxmenu.fav_bg" label="收藏当前壁纸" :disabled="!form.ctxmenu.enable"></el-checkbox>
+            <el-checkbox v-model="form.ctxmenu.loc_bg" label="定位当前壁纸" :disabled="!form.ctxmenu.enable"></el-checkbox>
+          </div>
+        </el-form-item>
+        <el-form-item label="全局热键">
           <el-checkbox v-model="form.hotkey.enable">启用全局热键</el-checkbox>
           <el-popover trigger="hover" placement="top">
             <div style="line-height: 150%;">
@@ -251,7 +272,7 @@
 import { mapGetters } from 'vuex'
 import { deepClone, hashCode, isImageUrl } from '../util/common'
 import hkMap from '../util/hkmap'
-import { selectFolder, updateConfig, createDesktopLnk, locateFavoritePath } from '../api/index'
+import { selectFolder, updateConfig, createDesktopLnk, locateFavoritePath, locateWorkdir } from '../api/index'
 
 export default {
   name: 'Setting',
@@ -261,7 +282,11 @@ export default {
         run: {
           startup: false,
           workdir: '',
-          proxy: 'none'
+          proxy: 'none',
+          rotation: 'network',
+          local: {
+            disorder: true
+          }
         },
         api: {
           name: 'wallhaven',
@@ -285,6 +310,13 @@ export default {
           next_bg: '',
           fav_bg: '',
           loc_bg: ''
+        },
+        ctxmenu: {
+          enable: false,
+          prev_bg: false,
+          next_bg: false,
+          fav_bg: false,
+          loc_bg: false
         }
       },
       customApiInput: [{ url: '', valid: false }],
@@ -329,12 +361,17 @@ export default {
     toWallhavenSetting() {
       this.$router.push({ name: 'Type' })
     },
-    selectDir() {
+    selectWorkdir() {
       selectFolder().then(res => {
         if (res) this.form.run.workdir = res
       }).catch(err => {
         console.log(err)
       })
+    },
+    clearWorkdir(event) {
+      this.form.run.workdir = ''
+      event.stopPropagation()
+      return false
     },
     timeUnitChange() {
       this.timeValue = parseInt(this.timeUnit === 'minute'
@@ -443,13 +480,20 @@ export default {
     },
     createDesktopLnk() {
       createDesktopLnk().then(resp => {
-        this.$message.success('创建创建快捷方式成功')
+        this.$message.success('创建桌面快捷方式成功')
       })
     },
     locateFavoritePath() {
       locateFavoritePath().then(resp => {
 
       })
+    },
+    locateWorkdir(event) {
+      event.stopPropagation()
+      locateWorkdir().then(resp => {
+
+      })
+      return false
     }
   }
 
@@ -460,7 +504,7 @@ export default {
 .setting {
   position: relative;
   width: 100%;
-  height: 48vh;
+  height: 50vh;
   padding-bottom: 36px;
 }
 
@@ -546,9 +590,23 @@ export default {
   overflow-x: hidden;
 }
 
-.disabled, .disabled * {
-  color: #c0c4cc;
-  user-select: none;
+.disabled {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    user-select: none;
+    z-index: 1;
+  }
+
+  &, & * {
+    color: #c0c4cc;
+  }
 }
 
 </style>

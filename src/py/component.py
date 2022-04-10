@@ -5,10 +5,12 @@
 
 @author Myles Yang
 """
-
+import mmap
 import os
 import sys
+import typing
 from threading import Timer
+from typing import Dict
 
 
 class SingletonMetaclass(type):
@@ -107,12 +109,12 @@ class SimpleTaskTimer(object):
 
     def __init__(self):
         self.__timer: Timer = None
-        self.__seconds = 0
+        self.__seconds = 0.0
         self.__action = None
         self.__args = None
         self.__kwargs = None
 
-    def run(self, seconds: int, action, args=None, kwargs=None):
+    def run(self, seconds: float, action, args=None, kwargs=None):
         """
         执行循环定时任务
 
@@ -201,3 +203,76 @@ class AppBreathe(object):
         """ 重置信号 """
         self.__signals = 0
         return True
+
+
+class SimpleMmapActuator(object):
+    """
+    基于mmap内存通信的实时单指令无参执行器
+
+    @author Myles Yang
+    """
+
+    def __init__(self, mname: str = 'GlobalRandomDesktopBackgroundShareMemory', msize: int = 64):
+        """
+        :param mname: 映射文件名称
+        :param msize: 映射大小（字节）
+        """
+        self.name = mname
+        self.size = msize
+        self.sm_rd: mmap = None
+        self.sm_rd_timer: SimpleTaskTimer = None
+        self.sm_rd_call_map: Dict[str, typing.Callable] = {}
+        pass
+
+    def run_monitor(self, check_seconds: float = 0.125):
+        """
+        监控命令
+
+        :param cmd_func_map: 命令与执行函数的映射表
+        :param check_seconds: 命令检查间隔
+        """
+        if self.sm_rd:
+            return
+        self.sm_rd = mmap.mmap(-1, self.size, tagname=self.name, access=mmap.ACCESS_WRITE)
+        self.__empty_sm()
+        self.sm_rd_timer = SimpleTaskTimer()
+        self.sm_rd_timer.run(check_seconds, self.__call_read)
+
+    def __call_read(self):
+        self.sm_rd.seek(0)
+        cmd = self.sm_rd.read(self.size)
+        cmd = str(cmd, encoding='utf-8').replace('\x00', '')
+        if cmd:
+            self.__empty_sm()
+            func = self.sm_rd_call_map.get(cmd)
+            if func and callable(func):
+                func()
+
+    def __empty_sm(self):
+        self.sm_rd.seek(0)
+        self.sm_rd.write(b'\x00' * self.size)
+        self.sm_rd.flush()
+
+    def set_cmd_func_map(self, cmd_func_map: Dict[str, typing.Callable]):
+        self.sm_rd_call_map = cmd_func_map
+
+    def append_cmd_func_map(self, cmd_func_map: Dict[str, typing.Callable]):
+        self.sm_rd_call_map.update(cmd_func_map)
+
+    def cancel_monitor(self):
+        """ 取消监控 """
+        if not self.sm_rd:
+            return
+        self.sm_rd_timer.cancel()
+        self.sm_rd.close()
+        self.sm_rd = None
+        self.sm_rd_call_map = None
+
+    def send_command(self, command: str):
+        """
+        发送执行命令
+        """
+        with mmap.mmap(-1, self.size, tagname=self.name, access=mmap.ACCESS_WRITE) as m:
+            m.seek(0)
+            m.write(bytes(command, encoding='utf-8'))
+            m.flush()

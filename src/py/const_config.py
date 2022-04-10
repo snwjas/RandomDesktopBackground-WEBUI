@@ -11,6 +11,7 @@ from enum import Enum
 
 # 程序名称
 app_name = '随机桌面壁纸'
+app_name_en = "RandomDesktopBackground"
 
 # webui 地址
 host = '127.6.6.6'
@@ -88,6 +89,13 @@ class Key:
         FAV_BG = 'hotkey.fav_bg'
         LOC_BG = 'hotkey.loc_bg'
 
+    class CtxMenu(Enum):
+        ENABLE = 'ctxmenu.enable'
+        PREV_BG = 'ctxmenu.prev_bg'
+        NEXT_BG = 'ctxmenu.next_bg'
+        FAV_BG = 'ctxmenu.fav_bg'
+        LOC_BG = 'ctxmenu.loc_bg'
+
 
 # wallhaven请求api
 wallhaven_api = 'https://wallhaven.cc/api/v1/search'
@@ -133,7 +141,7 @@ INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('run.proxy
 INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('run.rotation', 'network', 'str', 'b''\x80\x04\x95\x0b\x00\x00\x00\x00\x00\x00\x00\x8c\x07network\x94.''', '运行：轮播方式[network|local]');
 INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('run.local.disorder', 'True', 'bool', 'b''\x80\x04\x88.''', '运行：本地轮播是否为无序');
 INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.name', 'wallhaven', 'str', 'b''\x80\x04\x95\r\x00\x00\x00\x00\x00\x00\x00\x8c\twallhaven\x94.''', 'API：图源名[wallhaven|custom]');
-INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.wallhaven.url', 'https://wallhaven.cc/search?categories=111&purity=110&sorting=random&order=desc', 'str', 'b''\x80\x04\x95S\x00\x00\x00\x00\x00\x00\x00\x8cOhttps://wallhaven.cc/search?categories=111&purity=110&sorting=random&order=desc\x94.''', 'API：wallhaven图源地址');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.wallhaven.url', 'https://wallhaven.cc/search?categories=111&purity=110&sorting=random&order=desc&resolutions=1920x1080', 'str', 'b''\x80\x04\x95S\x00\x00\x00\x00\x00\x00\x00\x8cOhttps://wallhaven.cc/search?categories=111&purity=110&sorting=random&order=desc&resolutions=1920x1080\x94.''', 'API：wallhaven图源地址');
 INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.wallhaven.apikey', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', 'API：wallhaven API Key');
 INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.custom.url--536007639', 'https://api.btstu.cn/sjbz/?lx=suiji', 'str', NULL, '');
 INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('api.custom.url--542024925', 'https://api.btstu.cn/sjbz/?lx=meizi', 'str', NULL, '');
@@ -151,6 +159,11 @@ INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('hotkey.pr
 INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('hotkey.next_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：切换到下一张壁纸');
 INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('hotkey.fav_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：收藏当前壁纸');
 INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('hotkey.loc_bg', '', 'str', 'b''\x80\x04\x95\x04\x00\x00\x00\x00\x00\x00\x00\x8c\x00\x94.''', '热键：定位到当前壁纸文件');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('ctxmenu.enable', 'False', 'bool', 'b''\x80\x04\x89.''', '桌面右键菜单：是否启用桌面右键菜单');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('ctxmenu.prev_bg', 'False', 'bool', 'b''\x80\x04\x89.''', '桌面右键菜单：是否启用切换上一张壁纸');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('ctxmenu.next_bg', 'False', 'bool', 'b''\x80\x04\x89.''', '桌面右键菜单：是否启用切换下一张壁纸');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('ctxmenu.fav_bg', 'False', 'bool', 'b''\x80\x04\x89.''', '桌面右键菜单：是否启用收藏当前壁纸');
+INSERT INTO config ("key", value, pytype, "defaults", comment) VALUES('ctxmenu.loc_bg', 'False', 'bool', 'b''\x80\x04\x89.''', '桌面右键菜单：是否启用定位到当前壁纸文件');
 
 -- ----------------------------
 -- Indexes structure for table config

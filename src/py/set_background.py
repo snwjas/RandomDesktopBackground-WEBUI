@@ -11,11 +11,11 @@ import win32con
 import win32gui
 from system_hotkey import SystemHotkey
 
+import args_definition as argsdef
 import configurator as configr
 import const_config as const
 import utils
-from component import CustomLogger, SingletonMetaclass
-from component import SimpleTaskTimer
+from component import CustomLogger, SingletonMetaclass, SimpleTaskTimer, SimpleMmapActuator
 from utils import is_background_valid
 from vo import ConfigVO, E
 
@@ -101,6 +101,9 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
 
         # 绑定全局热键
         self.bind_hotkey()
+        # 监听执行命令
+        self.monitor_command()
+
         # 开启后台定时切换任务
         self.__timer = SimpleTaskTimer()
         self.__timer.run(self.__seconds, self.next_bg)
@@ -205,10 +208,10 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
             """ 本地顺序轮询 """
             self.set_background_idx(0)
             return
-        if not utils.is_network_available():
-            log.info('网络不连通，取消拉取壁纸，重新轮换已下载的壁纸')
-            self.set_background_idx(0)
-            return
+        # if not utils.is_network_available():
+        #     log.info('网络不连通，取消拉取壁纸，重新轮换已下载的壁纸')
+        #     self.set_background_idx(0)
+        #     return
         # self.__func_get_bg()
         Thread(target=self.__func_get_bg).start()
 
@@ -239,8 +242,9 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
     def set_background_idx(self, index: int):
         """ 设置壁纸 """
         if self.__bg_paths and 0 <= index < len(self.__bg_paths):
-            self.set_current(index)
-            return self.set_background(self.__bg_paths[index])
+            s = self.set_background(self.__bg_paths[index])
+            if s: self.set_current(index)
+            return s
         return False
 
     def __get_hotkey_cb(self, data: dict):
@@ -262,7 +266,7 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
         if self.__hotkey or not configr.is_hotkey_enabled(self.__config):
             return
 
-        self.__hotkey = SystemHotkey(check_queue_interval=0.01)
+        self.__hotkey = SystemHotkey(check_queue_interval=0.125)
         # 热键绑定的数量
         bind_count = 0
         # 热键绑定成功的数量
@@ -273,22 +277,22 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
         hks_to_bind = [
             {
                 'hk': configr.get_hotkey_prev(self.__config),
-                'name': '上一个桌面背景',
+                'name': '上一张桌面壁纸',
                 'cb': self.prev_bg
             },
             {
                 'hk': configr.get_hotkey_next(self.__config),
-                'name': '下一个桌面背景',
+                'name': '下一张桌面壁纸',
                 'cb': self.next_bg
             },
             {
                 'hk': configr.get_hotkey_locate(self.__config),
-                'name': '定位当前桌面背景文件',
+                'name': '定位当前桌面壁纸文件',
                 'cb': self.locate_bg
             },
             {
                 'hk': configr.get_hotkey_favorite(self.__config),
-                'name': '收藏当前壁纸',
+                'name': '收藏当前桌面壁纸',
                 'cb': self.favorite_bg
             }
         ]
@@ -345,3 +349,28 @@ class SetBackgroundTask(object, metaclass=SingletonMetaclass):
             return False, e
 
         return True, '热键可被注册'
+
+    def monitor_command(self):
+        """ 监听执行命令 """
+        if not configr.is_ctxmenu_enabled(self.__config):
+            return
+
+        cmd_func_map = {}
+
+        if configr.is_ctxmenu_prev_enabled(self.__config):
+            cmd_func_map[argsdef.ARG_CMD_TYPE_PRE] = self.prev_bg
+
+        if configr.is_ctxmenu_next_enabled(self.__config):
+            cmd_func_map[argsdef.ARG_CMD_TYPE_NXT] = self.next_bg
+
+        if configr.is_ctxmenu_favorite_enabled(self.__config):
+            cmd_func_map[argsdef.ARG_CMD_TYPE_FAV] = self.favorite_bg
+
+        if configr.is_ctxmenu_locate_enabled(self.__config):
+            cmd_func_map[argsdef.ARG_CMD_TYPE_LOC] = self.locate_bg
+
+        if len(cmd_func_map) > 0:
+            sma = SimpleMmapActuator()
+            sma.set_cmd_func_map(cmd_func_map)
+            sma.run_monitor()
+            log.info('开启命令执行器：监听可执行命令:{}'.format(cmd_func_map.keys()))

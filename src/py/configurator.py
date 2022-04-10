@@ -290,6 +290,54 @@ def __get_hotkey(config: ConfigVO) -> List[str]:
     return utils.list_deduplication(hk)
 
 
+"""============================ [CtxMenu] ============================"""
+
+
+def is_ctxmenu_enabled(config: Dict[str, ConfigVO] = None) -> bool:
+    """
+    是否启用桌面右键菜单
+    """
+    key = const.Key.CtxMenu.ENABLE.value
+    vo = config.get(key) if config else dao.get_config(key)
+    return vo and vo.value
+
+
+def is_ctxmenu_prev_enabled(config: Dict[str, ConfigVO] = None) -> bool:
+    """
+    是否启用桌面右键菜单
+    """
+    key = const.Key.CtxMenu.PREV_BG.value
+    vo = config.get(key) if config else dao.get_config(key)
+    return vo and vo.value
+
+
+def is_ctxmenu_next_enabled(config: Dict[str, ConfigVO] = None) -> bool:
+    """
+    是否启用切换下一张壁纸右键菜单
+    """
+    key = const.Key.CtxMenu.NEXT_BG.value
+    vo = config.get(key) if config else dao.get_config(key)
+    return vo and vo.value
+
+
+def is_ctxmenu_locate_enabled(config: Dict[str, ConfigVO] = None) -> bool:
+    """
+    是否启用收藏当前壁纸右键菜单
+    """
+    key = const.Key.CtxMenu.FAV_BG.value
+    vo = config.get(key) if config else dao.get_config(key)
+    return vo and vo.value
+
+
+def is_ctxmenu_favorite_enabled(config: Dict[str, ConfigVO] = None) -> bool:
+    """
+    是否启用定位到当前壁纸文件右键菜单
+    """
+    key = const.Key.CtxMenu.LOC_BG.value
+    vo = config.get(key) if config else dao.get_config(key)
+    return vo and vo.value
+
+
 """============================ PID ============================"""
 
 

@@ -51,7 +51,9 @@ def toggle_startup_shutdown():
         utils.kill_process([bpid])
         check_running_status(False)
     else:
-        succeed = app.run_in_the_background(argsdef.ARG_LOG_TYPE_FILE)
+        args = ' {} {} {} {}'.format(argsdef.ARG_RUN, argsdef.ARG_RUN_TYPE_BACKGROUND,
+                                     argsdef.ARG_LOG, argsdef.ARG_LOG_TYPE_FILE)
+        succeed, msg = utils.run_in_background(app.app_fullpath, args)
         if succeed:
             check_running_status(True)
     return get_status()
@@ -76,6 +78,8 @@ def update_config(config: dict):
             run_startup = config.get(const.Key.Run.STARTUP.value)
             if run_startup is not None:
                 create_startup_lnk() if run_startup else delete_startup_lnk()
+            # 桌面右键菜单
+            create_desktop_context_menu(dao.list_config())
 
     except Exception as e:
         raise E().e(e, message="配置更新失败")
@@ -125,3 +129,62 @@ def locate_workdir():
         utils.locate_path(workdir, False)
     else:
         raise E().ret(message="工作目录不存在：{}".format(workdir))
+
+
+def create_desktop_context_menu(config=None):
+    """ 删除 -> 添加 """
+    utils.delete_desktop_context_menu(const.app_name_en)
+    if not configr.is_ctxmenu_enabled(config): return
+
+    prev = configr.is_ctxmenu_prev_enabled(config)
+    next = configr.is_ctxmenu_next_enabled(config)
+    fav = configr.is_ctxmenu_favorite_enabled(config)
+    loc = configr.is_ctxmenu_locate_enabled(config)
+
+    if not (prev or next or fav or loc): return
+
+    def get_sub_menu(name, cmd, icon_idx, order):
+        return [
+            {
+                'sub_key': '{}\\shell\\itm{}-{}'.format(const.app_name_en, order, cmd),
+                'values': {
+                    'Icon': '{},{}'.format(app.app_fullpath, icon_idx),
+                    'MUIVerb': name,
+                }
+            },
+            {
+                'sub_key': '{}\\shell\\itm{}-{}\\command'.format(const.app_name_en, order, cmd),
+                'values': {
+                    '': '{} --run cmd --cmd {}'.format(app.app_fullpath, cmd),
+                }
+            }
+        ]
+
+    reg_to_create = []
+    if prev:
+        reg_to_create.append(('上一张壁纸', 'pre', 1, 1))
+    if next:
+        reg_to_create.append(('下一张壁纸', 'nxt', 2, 2))
+    if fav:
+        reg_to_create.append(('收藏当前壁纸', 'fav', 3, 3))
+    if loc:
+        reg_to_create.append(('定位当前壁纸', 'loc', 4, 4))
+
+    if len(reg_to_create) == 1:
+        data = reg_to_create[0]
+        utils.create_desktop_context_menu(const.app_name_en, {
+            'Icon': '{},{}'.format(app.app_fullpath, 0),
+            'MUIVerb': data[0],
+        })
+        utils.create_desktop_context_menu(const.app_name_en + "\\command", {
+            '': '{} --run cmd --cmd {}'.format(app.app_fullpath, data[1]),
+        })
+    else:
+        utils.create_desktop_context_menu(const.app_name_en, {
+            'Icon': '{},{}'.format(app.app_fullpath, 0),
+            'MUIVerb': const.app_name,
+            'SubCommands': ''
+        })
+        for tp in reg_to_create:
+            for d in get_sub_menu(*tp):
+                utils.create_desktop_context_menu(d['sub_key'], d['values'])

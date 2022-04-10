@@ -8,6 +8,8 @@ cls
 @REM 打包依赖 pyinstaller
 @REM pip install pyinstaller
 
+::gcc -mwindows cmdtransmitter.c -o cmdtransmitter.exe
+
 if exist build rd /S /Q build
 
 if exist dist rd /S /Q dist

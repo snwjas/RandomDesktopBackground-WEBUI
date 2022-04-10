@@ -43,7 +43,7 @@ def init_app_breathe():
     def cb():
         log.info('WEBUI长时间无操作，自动退出程序')
         configr.record_fpid(False)
-        utils.kill_process([os.getpid(), utils.getpid()])
+        utils.kill_process([os.getpid()])
 
     global app_breathe
     app_breathe = AppBreathe(60, 5)
@@ -66,7 +66,7 @@ async def favicon():
 async def exit_webui():
     log.info('主动关闭WEBUI服务')
     configr.record_fpid(False)
-    msg = utils.kill_process([os.getpid(), utils.getpid()])
+    msg = utils.kill_process([os.getpid()])
     return R().ok(message='结束WEBUI服务端进程', data=msg)
 
 
@@ -80,7 +80,7 @@ async def webui():
     if not os.path.exists(os.path.join(const.app_dirname, 'webui', 'index.html')):
         utils.create_dialog("WEBUI组件缺失！", const.dialog_title,
                             style=win32con.MB_ICONERROR, interval=7,
-                            callback=lambda x: utils.kill_process([os.getpid(), utils.getpid()]))
+                            callback=lambda x: utils.kill_process([os.getpid()]))
         return R().err('WEBUI组件缺失')
     return RedirectResponse('/webui/index.html')
 

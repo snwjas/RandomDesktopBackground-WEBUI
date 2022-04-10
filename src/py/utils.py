@@ -25,6 +25,8 @@ import win32api
 import win32com.client as win32com_client
 import win32con
 import win32gui
+import win32inet
+import win32inetcon
 import win32process
 import win32ui
 from requests import Response
@@ -522,14 +524,14 @@ def get_win_valid_filename(filename: str, sub: str = '') -> str:
 
 def is_network_available() -> bool:
     """ 判断网络是否连通 """
-    url = 'baidu.com'
+    # try:
+    #     exit_code = os.system('ping baidu.com')
+    #     return exit_code == 0
+    # except:
+    #     return False
     try:
-        # popen = os.popen('nslookup {}'.format(url))
-        # result = popen.read()
-        # if re.match(r'.*(No response|fec0:0:0:ffff::1|127.0.0.1).*', result, flags=re.I | re.S):
-        #     return False
-        exit_code = os.system('ping {}'.format(url))
-        return exit_code == 0
+        win32inet.InternetCheckConnection('https://www.baidu.com', win32inetcon.FLAG_ICC_FORCE_CONNECTION, 0)
+        return True
     except:
         return False
 
@@ -554,3 +556,38 @@ def set_win_title(title: str, pid: int = None):
     # hwnd = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION, False, 5676)
     # print(win32process.GetProcessId(hwnd))
     # win32api.CloseHandle(hwnd)
+
+
+def create_desktop_context_menu(sub_key: str, values: typing.Dict[str, str]):
+    """
+    创建桌面上下文菜单
+
+    :param sub_key:
+    :param values: REG_SZ value
+    """
+    if not sub_key: return False
+    reg_key = None
+    try:
+        reg_key = win32api.RegCreateKey(win32con.HKEY_CLASSES_ROOT, "DesktopBackground\\Shell\\" + sub_key)
+        for key in values:
+            win32api.RegSetValueEx(reg_key, str(key), 0, win32con.REG_SZ, str(values[key]))
+        return True
+    except Exception as e:
+        return False
+    finally:
+        if reg_key: win32api.RegCloseKey(reg_key)
+
+
+def delete_desktop_context_menu(sub_key: str):
+    """ 删除桌面上下文菜单 """
+    if not sub_key: return False
+    reg_key = None
+    try:
+        reg_key = win32api.RegOpenKeyEx(win32con.HKEY_CLASSES_ROOT, "DesktopBackground\\Shell",
+                                        0, win32con.KEY_ALL_ACCESS)
+        win32api.RegDeleteTree(reg_key, sub_key)
+        return True
+    except Exception as e:
+        return False
+    finally:
+        if reg_key: win32api.RegCloseKey(reg_key)
